@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="theme-color" content="#0f172a"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Corretor Pró"/>
+<title>Corretor Pró</title>
+<script>
+const manifest = {
+  name:"Corretor Pró",short_name:"CorretorPró",start_url:"./",display:"standalone",
+  background_color:"#0f172a",theme_color:"#1d4ed8",orientation:"portrait",
+  icons:[
+    {src:"data:image/svg+xml;base64,"+btoa(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%231d4ed8'/><text x='50%' y='58%' dominant-baseline='middle' text-anchor='middle' font-size='110'>🏡</text></svg>`),sizes:"192x192",type:"image/svg+xml"},
+    {src:"data:image/svg+xml;base64,"+btoa(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='80' fill='%231d4ed8'/><text x='50%' y='58%' dominant-baseline='middle' text-anchor='middle' font-size='300'>🏡</text></svg>`),sizes:"512x512",type:"image/svg+xml"}
+  ]
+};
+const blob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
+const lnk=document.createElement('link');lnk.rel='manifest';lnk.href=URL.createObjectURL(blob);
+document.head.appendChild(lnk);
+</script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
+:root{
+  --bg:#0a0f1e;--surface:#111827;--surface2:#1e2d45;--border:#1e3a5f;
+  --accent:#2563eb;--accent2:#7c3aed;--green:#10b981;--yellow:#f59e0b;
+  --red:#ef4444;--text:#f0f6ff;--muted:#64748b;--subtext:#94a3b8;
+  --wpp:#25D366;--insta:#E1306C;--radius:14px;
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow:hidden;}
+#app{display:flex;flex-direction:column;height:100dvh;max-width:480px;margin:0 auto;position:relative;}
+.header{background:linear-gradient(135deg,#0f2444 0%,#1a3a6e 100%);padding:14px 18px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:1px solid var(--border);padding-top:calc(14px + env(safe-area-inset-top,0px));}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-icon{font-size:28px;line-height:1;}
+.logo-name{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:#fff;letter-spacing:-0.3px;}
+.logo-sub{font-size:10px;color:#93c5fd;font-weight:400;margin-top:1px;}
+.btn-ia-header{background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;border-radius:20px;color:#fff;font-weight:700;font-size:12px;padding:8px 14px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;box-shadow:0 2px 12px rgba(124,58,237,0.4);}
+.main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:16px;padding-bottom:calc(80px + var(--safe-bottom));}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#0d1829;border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(5,1fr);padding-bottom:var(--safe-bottom);z-index:100;}
+.nav-btn{background:none;border:none;color:var(--muted);padding:10px 2px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:'DM Sans',sans-serif;}
+.nav-btn .nav-icon{font-size:18px;line-height:1;}
+.nav-btn .nav-label{font-size:9px;font-weight:600;}
+.nav-btn.active{color:var(--accent);}
+.page-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--text);margin-bottom:16px;}
+.metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px;}
+.metric-card{background:var(--surface);border-radius:var(--radius);padding:14px;border:1px solid var(--border);position:relative;overflow:hidden;}
+.metric-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.metric-card.green::before{background:var(--green);}
+.metric-card.blue::before{background:var(--accent);}
+.metric-card.yellow::before{background:var(--yellow);}
+.metric-card.purple::before{background:var(--accent2);}
+.metric-num{font-family:'Syne',sans-serif;font-size:30px;font-weight:800;color:var(--text);line-height:1;}
+.metric-label{font-size:11px;color:var(--subtext);margin-top:4px;font-weight:500;}
+.box{background:var(--surface);border-radius:var(--radius);padding:14px;margin-bottom:14px;border:1px solid var(--border);}
+.box-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--text);margin-bottom:10px;}
+.lead-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;gap:8px;}
+.lead-row:last-child{border-bottom:none;}
+.lead-nome{font-weight:600;font-size:13px;color:var(--text);}
+.lead-info{font-size:11px;color:var(--subtext);margin-top:2px;}
+.badge{border-radius:20px;padding:3px 9px;font-size:10px;font-weight:700;color:#fff;white-space:nowrap;flex-shrink:0;}
+.canal-row{display:flex;gap:8px;margin-bottom:10px;}
+.canal-btn{flex:1;background:var(--surface2);border:2px solid var(--border);border-radius:10px;color:var(--subtext);padding:9px;cursor:pointer;font-weight:600;font-size:13px;font-family:'DM Sans',sans-serif;}
+.canal-btn.active-wpp{background:#064e2e;border-color:var(--wpp);color:#fff;}
+.canal-btn.active-insta{background:#4a0a2a;border-color:var(--insta);color:#fff;}
+textarea,input,select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:10px 12px;font-size:13px;font-family:'DM Sans',sans-serif;resize:vertical;outline:none;-webkit-appearance:none;}
+textarea:focus,input:focus,select:focus{border-color:var(--accent);}
+select option{background:var(--surface);}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:10px;padding:12px 18px;font-weight:700;font-size:14px;cursor:pointer;width:100%;margin-top:8px;font-family:'DM Sans',sans-serif;box-shadow:0 4px 15px rgba(37,99,235,0.3);}
+.btn-primary:disabled{opacity:0.5;cursor:not-allowed;}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px 16px;font-weight:600;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.btn-small{background:var(--surface2);color:var(--subtext);border:1px solid var(--border);border-radius:8px;padding:6px 11px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;}
+.btn-wpp{background:#064e2e;color:var(--wpp);border:1px solid var(--wpp);border-radius:8px;padding:6px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.btn-copy{background:var(--green);color:#fff;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:700;font-size:12px;font-family:'DM Sans',sans-serif;margin-top:10px;}
+.btn-add{background:var(--accent);color:#fff;border:none;border-radius:10px;padding:9px 14px;font-weight:700;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.ai-result{background:var(--bg);border:1px solid var(--accent);border-radius:10px;padding:12px;margin-top:12px;}
+.ai-channel-label{font-size:11px;font-weight:700;margin-bottom:6px;}
+.ai-text{font-size:13px;color:var(--text);white-space:pre-wrap;line-height:1.7;}
+.lead-card{background:var(--surface);border-radius:var(--radius);padding:14px;margin-bottom:10px;border:1px solid var(--border);border-left:4px solid var(--accent);}
+.lead-card-top{display:flex;justify-content:space-between;gap:8px;}
+.lead-card-nome{font-weight:700;font-size:15px;color:var(--text);}
+.lead-card-info{font-size:11px;color:var(--subtext);margin-top:3px;line-height:1.6;}
+.lead-card-nota{font-size:11px;color:var(--yellow);margin-top:4px;}
+.lead-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
+select.select-small{background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:6px 8px;font-size:11px;width:auto;flex:1;min-width:120px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+label{display:block;font-size:11px;color:var(--subtext);margin-bottom:4px;font-weight:600;}
+.imovel-card{background:var(--surface);border-radius:var(--radius);padding:14px;margin-bottom:12px;border:1px solid var(--border);}
+.imovel-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.imovel-tipo{background:var(--accent);color:#fff;border-radius:6px;padding:2px 9px;font-size:11px;font-weight:700;}
+.imovel-titulo{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:var(--text);margin-bottom:4px;}
+.imovel-preco{color:var(--green);font-weight:800;font-size:20px;margin-bottom:6px;}
+.imovel-details{font-size:11px;color:var(--subtext);line-height:1.9;}
+.imovel-desc{font-size:11px;color:var(--muted);margin-top:6px;font-style:italic;}
+.imovel-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
+.sugest-grid{display:flex;flex-wrap:wrap;gap:7px;}
+.sugest-btn{background:var(--surface2);border:1px solid var(--border);border-radius:20px;color:var(--subtext);padding:7px 12px;cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif;}
+.title-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);display:flex;align-items:flex-end;justify-content:center;z-index:999;}
+.modal{background:var(--surface);border-radius:20px 20px 0 0;padding:20px 18px;padding-bottom:calc(20px + var(--safe-bottom));width:100%;max-width:480px;max-height:85vh;overflow-y:auto;border-top:1px solid var(--border);}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px;}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.modal-title{font-family:'Syne',sans-serif;font-weight:700;font-size:16px;}
+.btn-close{background:var(--surface2);border:none;color:var(--text);border-radius:8px;padding:5px 11px;cursor:pointer;font-weight:700;font-size:14px;}
+.notif{position:fixed;top:16px;left:50%;transform:translateX(-50%);color:#fff;padding:10px 20px;border-radius:20px;font-weight:700;font-size:13px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.3);animation:fadeInOut 3s forwards;white-space:nowrap;}
+@keyframes fadeInOut{0%{opacity:0;transform:translateX(-50%) translateY(-10px);}15%{opacity:1;transform:translateX(-50%) translateY(0);}80%{opacity:1;}100%{opacity:0;}}
+.hint{font-size:12px;color:var(--subtext);margin-bottom:10px;line-height:1.5;}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;margin-right:6px;vertical-align:middle;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.empty{text-align:center;padding:30px 0;color:var(--muted);font-size:13px;}
+.wpp-msg-card{background:var(--surface);border-radius:12px;padding:12px;margin-bottom:10px;border:1px solid var(--border);border-left:4px solid var(--wpp);}
+.wpp-msg-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.wpp-msg-from{font-weight:700;font-size:13px;color:var(--text);}
+.wpp-msg-time{font-size:10px;color:var(--subtext);}
+.wpp-msg-text{font-size:12px;color:var(--subtext);line-height:1.5;margin-bottom:8px;}
+.wpp-msg-actions{display:flex;gap:6px;flex-wrap:wrap;}
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px;}
+.status-dot.online{background:var(--green);}
+.status-dot.offline{background:var(--red);}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="header">
+    <div class="logo">
+      <span class="logo-icon">🏡</span>
+      <div>
+        <div class="logo-name">Corretor Pró</div>
+        <div class="logo-sub" id="zapi-status-header">● Verificando WhatsApp...</div>
+      </div>
+    </div>
+    <button class="btn-ia-header" onclick="openAiModal()">✨ Gerar Msg</button>
+  </header>
+  <main class="main" id="main-content"></main>
+  <nav class="nav">
+    <button class="nav-btn active" id="nav-dashboard" onclick="setTab('dashboard')"><span class="nav-icon">📊</span><span class="nav-label">Dashboard</span></button>
+    <button class="nav-btn" id="nav-wpp" onclick="setTab('wpp')"><span class="nav-icon">💬</span><span class="nav-label">WhatsApp</span></button>
+    <button class="nav-btn" id="nav-leads" onclick="setTab('leads')"><span class="nav-icon">👥</span><span class="nav-label">Leads</span></button>
+    <button class="nav-btn" id="nav-imoveis" onclick="setTab('imoveis')"><span class="nav-icon">🏠</span><span class="nav-label">Imóveis</span></button>
+    <button class="nav-btn" id="nav-ia" onclick="setTab('ia')"><span class="nav-icon">🤖</span><span class="nav-label">IA</span></button>
+  </nav>
+</div>
+
+<div class="modal-overlay" id="ai-modal" style="display:none" onclick="closeAiModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title">✨ Gerar Mensagem com IA</span>
+      <button class="btn-close" onclick="closeAiModal()">✕</button>
+    </div>
+    <div class="canal-row">
+      <button class="canal-btn" id="modal-wpp" onclick="setModalCanal('WhatsApp')">💬 WhatsApp</button>
+      <button class="canal-btn" id="modal-insta" onclick="setModalCanal('Instagram')">📸 Instagram</button>
+    </div>
+    <textarea id="modal-prompt" rows="3" placeholder="O que o cliente perguntou?" style="margin-top:8px"></textarea>
+    <button class="btn-primary" id="modal-btn" onclick="runModalAI()">✨ Gerar Resposta</button>
+    <div id="modal-result" style="display:none" class="ai-result">
+      <div class="ai-channel-label" id="modal-channel-label"></div>
+      <div class="ai-text" id="modal-text"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+        <button class="btn-copy" onclick="copyModalResult()">📋 Copiar</button>
+        <button id="modal-send-btn" style="display:none" class="btn-wpp" onclick="sendModalReply()">📤 Enviar pelo WhatsApp</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="notif" class="notif" style="display:none"></div>
+
+<script>
+// ── PROXY URL (usa a API do Vercel) ──
+const PROXY = '/api/zapi';
+
+const STATUS_COLORS = {'Novo':'#22c55e','Em negociação':'#f59e0b','Visita agendada':'#3b82f6','Proposta enviada':'#8b5cf6','Fechado':'#10b981','Perdido':'#ef4444'};
+const CANAL_ICON = {WhatsApp:'💬',Instagram:'📸'};
+
+function load(k,fb){try{const d=localStorage.getItem(k);return d?JSON.parse(d):fb;}catch(e){return fb;}}
+function save(k,d){try{localStorage.setItem(k,JSON.stringify(d));}catch(e){}}
+
+let leads=load('cp_leads',[
+  {id:1,nome:'Carlos Mendes',telefone:'(11) 99887-6655',canal:'WhatsApp',status:'Novo',interesse:'Apartamento 3 quartos',valor:'R$ 450.000',ultimoContato:'2026-05-24',notas:'Quer financiar, tem FGTS',phone:'11998876655'},
+  {id:2,nome:'Fernanda Lima',telefone:'(11) 97654-3210',canal:'Instagram',status:'Em negociação',interesse:'Casa em condomínio',valor:'R$ 780.000',ultimoContato:'2026-05-23',notas:'Prefere Alphaville',phone:''},
+  {id:3,nome:'Roberto Souza',telefone:'(21) 98765-4321',canal:'WhatsApp',status:'Visita agendada',interesse:'Terreno 500m²',valor:'R$ 220.000',ultimoContato:'2026-05-22',notas:'Quer construir',phone:'21987654321'},
+]);
+let imoveis=load('cp_imoveis',[
+  {id:1,tipo:'Apartamento',titulo:'Apto Garden Vila Nova',preco:'R$ 450.000',area:'85m²',quartos:3,banheiros:2,vagas:1,bairro:'Vila Nova Conceição',cidade:'São Paulo',status:'Disponível',descricao:'Apartamento garden moderno, varanda gourmet, piscina'},
+  {id:2,tipo:'Casa',titulo:'Casa Condomínio Alphaville',preco:'R$ 890.000',area:'220m²',quartos:4,banheiros:3,vagas:3,bairro:'Alphaville',cidade:'Barueri',status:'Disponível',descricao:'Casa em condomínio fechado, piscina, área gourmet, segurança 24h'},
+  {id:3,tipo:'Terreno',titulo:'Terreno Residencial Cotia',preco:'R$ 210.000',area:'500m²',quartos:0,banheiros:0,vagas:0,bairro:'Granja Viana',cidade:'Cotia',status:'Disponível',descricao:'Terreno plano, documentação ok, escritura registrada'},
+]);
+let wppMessages=load('cp_wpp_msgs',[]);
+let zapiOnline=false;
+let currentTab='dashboard';
+let modalCanal='WhatsApp',modalResult='',modalReplyPhone='';
+let iaCanal='WhatsApp',iaResult2='';
+let dashCanal='WhatsApp',dashResult='';
+let deferredPrompt=null;
+
+// ── Z-API via Proxy ──
+async function zapiCall(endpoint, method='GET', body=null) {
+  const url = `${PROXY}?endpoint=${encodeURIComponent(endpoint)}`;
+  const opts = {method, headers:{'Content-Type':'application/json'}};
+  if(body) opts.body = JSON.stringify(body);
+  const r = await fetch(url, opts);
+  return r.json();
+}
+
+async function checkZapiStatus() {
+  try {
+    const data = await zapiCall('status');
+    zapiOnline = data.connected===true||data.status==='connected'||data.value==='connected';
+  } catch(e){ zapiOnline=false; }
+  const el=document.getElementById('zapi-status-header');
+  if(el) el.innerHTML=zapiOnline
+    ?'<span style="color:#4ade80">● WhatsApp conectado</span>'
+    :'<span style="color:#f87171">● WhatsApp desconectado</span>';
+}
+
+async function sendWppMessage(phone, message) {
+  const clean=phone.replace(/\D/g,'');
+  const num=clean.startsWith('55')?clean:'55'+clean;
+  return zapiCall('send-text','POST',{phone:num,message});
+}
+
+async function loadWppMessages() {
+  try {
+    const data = await zapiCall('messages/received?amount=20');
+    if(data && Array.isArray(data)) {
+      wppMessages = data.map(m=>({
+        id: m.id||Date.now()+Math.random(),
+        from: m.phone||'Desconhecido',
+        name: m.senderName||m.phone||'Cliente',
+        text: m.text?.message||m.body||m.message||'',
+        time: m.momment?new Date(m.momment*1000).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'--:--',
+        phone: m.phone||'',
+        processado: false
+      })).filter(m=>m.text);
+      save('cp_wpp_msgs',wppMessages);
+    }
+  } catch(e){}
+}
+
+async function criarLeadDaMensagem(msg) {
+  showNotif('⏳ IA analisando mensagem...');
+  try {
+    const prompt=`Analise essa mensagem de WhatsApp de um possível cliente de imóveis e extraia as informações. Retorne APENAS um JSON válido sem markdown com os campos: nome (use o nome se mencionado, senão "Cliente "+últimos 4 dígitos), interesse (tipo de imóvel ou "A definir"), valor (valor mencionado ou "A consultar"), notas (resumo em 1 frase).\n\nMensagem: "${msg.text}"\nNome/Número: ${msg.name}`;
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    const txt=data.content?.map(i=>i.text||'').join('')||'{}';
+    const info=JSON.parse(txt.replace(/```json|```/g,'').trim());
+    const novo={
+      id:Date.now(),nome:info.nome||msg.name||'Cliente WhatsApp',
+      telefone:msg.phone?msg.phone.replace('55','').replace(/(\d{2})(\d{5})(\d{4})/,'($1) $2-$3'):'',
+      phone:msg.phone||'',canal:'WhatsApp',status:'Novo',
+      interesse:info.interesse||'A definir',valor:info.valor||'A consultar',
+      notas:info.notas||msg.text.substring(0,100),
+      ultimoContato:new Date().toISOString().split('T')[0]
+    };
+    leads=[novo,...leads];
+    save('cp_leads',leads);
+    showNotif('✅ Lead criado automaticamente!');
+    render();
+  } catch(e){showNotif('⚠️ Erro ao criar lead','#ef4444');}
+}
+
+// ── NAVEGAÇÃO ──
+function setTab(tab) {
+  currentTab=tab;
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  const btn=document.getElementById('nav-'+tab);
+  if(btn) btn.classList.add('active');
+  if(tab==='wpp') loadWppMessages().then(()=>render());
+  else render();
+}
+
+// ── NOTIF ──
+function showNotif(msg,color) {
+  const el=document.getElementById('notif');
+  el.textContent=msg;el.style.background=color||'#10b981';
+  el.style.display='block';el.style.animation='none';
+  void el.offsetWidth;el.style.animation='fadeInOut 3s forwards';
+  setTimeout(()=>{el.style.display='none';},3000);
+}
+function copyText(txt) {
+  navigator.clipboard.writeText(txt).then(()=>showNotif('✅ Copiado!')).catch(()=>{
+    const t=document.createElement('textarea');t.value=txt;
+    document.body.appendChild(t);t.select();document.execCommand('copy');
+    document.body.removeChild(t);showNotif('✅ Copiado!');
+  });
+}
+
+// ── IA ──
+async function callAI(prompt,canal) {
+  const sys=`Você é um assistente especializado em corretores de imóveis brasileiros. Gere mensagens profissionais, calorosas e persuasivas para ${canal}. ${canal==='WhatsApp'?'Use linguagem direta, emojis moderados, parágrafos curtos.':'Use hashtags relevantes, emojis, tom inspirador.'} Inclua saudação, resposta ao interesse, benefícios, chamada para ação.`;
+  const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,messages:[{role:'user',content:prompt}]})});
+  const data=await res.json();
+  return data.content?.map(i=>i.text||'').join('\n')||'Erro ao gerar.';
+}
+
+// ── MODAL ──
+function openAiModal(prompt='',canal='WhatsApp',phone='') {
+  modalCanal=canal;modalReplyPhone=phone;
+  document.getElementById('modal-prompt').value=prompt;
+  document.getElementById('modal-result').style.display='none';
+  document.getElementById('modal-btn').innerHTML='✨ Gerar Resposta';
+  document.getElementById('modal-btn').disabled=false;
+  document.getElementById('modal-send-btn').style.display=phone?'block':'none';
+  updateModalCanalUI();
+  document.getElementById('ai-modal').style.display='flex';
+}
+function closeAiModal(e){if(!e||e.target===document.getElementById('ai-modal'))document.getElementById('ai-modal').style.display='none';}
+function setModalCanal(c){modalCanal=c;updateModalCanalUI();}
+function updateModalCanalUI(){
+  document.getElementById('modal-wpp').className='canal-btn'+(modalCanal==='WhatsApp'?' active-wpp':'');
+  document.getElementById('modal-insta').className='canal-btn'+(modalCanal==='Instagram'?' active-insta':'');
+}
+async function runModalAI(){
+  const prompt=document.getElementById('modal-prompt').value.trim();
+  if(!prompt)return;
+  const btn=document.getElementById('modal-btn');
+  btn.innerHTML='<span class="spinner"></span>Gerando...';btn.disabled=true;
+  document.getElementById('modal-result').style.display='none';
+  try{
+    const r=await callAI(prompt,modalCanal);modalResult=r;
+    const lbl=document.getElementById('modal-channel-label');
+    lbl.style.color=modalCanal==='WhatsApp'?'#25D366':'#E1306C';
+    lbl.textContent=CANAL_ICON[modalCanal]+' Resposta para '+modalCanal;
+    document.getElementById('modal-text').textContent=r;
+    document.getElementById('modal-result').style.display='block';
+  }catch(e){}
+  btn.innerHTML='✨ Gerar Resposta';btn.disabled=false;
+}
+function copyModalResult(){copyText(modalResult);}
+async function sendModalReply(){
+  if(!modalResult||!modalReplyPhone)return;
+  const btn=document.getElementById('modal-send-btn');
+  btn.innerHTML='<span class="spinner"></span>Enviando...';btn.disabled=true;
+  const res=await sendWppMessage(modalReplyPhone,modalResult);
+  if(res&&!res.error){showNotif('✅ Mensagem enviada!');document.getElementById('ai-modal').style.display='none';}
+  else showNotif('⚠️ Erro ao enviar','#ef4444');
+  btn.innerHTML='📤 Enviar pelo WhatsApp';btn.disabled=false;
+}
+
+// ── RENDER ──
+function render(){
+  const main=document.getElementById('main-content');
+  if(currentTab==='dashboard')main.innerHTML=renderDashboard();
+  else if(currentTab==='wpp')main.innerHTML=renderWpp();
+  else if(currentTab==='leads')main.innerHTML=renderLeads();
+  else if(currentTab==='imoveis')main.innerHTML=renderImoveis();
+  else if(currentTab==='ia')main.innerHTML=renderIA();
+}
+
+function renderDashboard(){
+  const novos=leads.filter(l=>l.status==='Novo').length;
+  const neg=leads.filter(l=>l.status==='Em negociação').length;
+  const fechados=leads.filter(l=>l.status==='Fechado').length;
+  const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone=window.matchMedia('(display-mode:standalone)').matches||window.navigator.standalone;
+  const msgsPend=wppMessages.filter(m=>!m.processado).length;
+  const installBanner=(deferredPrompt&&!isStandalone)?`<div style="background:linear-gradient(135deg,#1a3a6e,#2563eb);border-radius:12px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;border:1px solid #3b82f6;"><span style="font-size:26px">📲</span><div style="flex:1;font-size:12px;color:#bfdbfe;line-height:1.5;"><strong style="color:#fff;display:block;margin-bottom:2px">Instalar o Corretor Pró</strong>Adicione à tela inicial!</div><button class="btn-add" onclick="installPWA()">Instalar</button></div>`:(isIOS&&!isStandalone)?`<div style="background:linear-gradient(135deg,#1a3a6e,#2563eb);border-radius:12px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;border:1px solid #3b82f6;"><span style="font-size:26px">📲</span><div style="flex:1;font-size:12px;color:#bfdbfe;line-height:1.5;"><strong style="color:#fff;display:block">Instalar no iPhone</strong>Compartilhar ↑ → "Adicionar à Tela de Início"</div></div>`:'';
+  return `${installBanner}
+  <div class="page-title">Dashboard</div>
+  <div class="metrics">
+    <div class="metric-card green"><div class="metric-num">${leads.length}</div><div class="metric-label">Total Leads</div></div>
+    <div class="metric-card blue"><div class="metric-num">${novos}</div><div class="metric-label">Novos Leads</div></div>
+    <div class="metric-card yellow"><div class="metric-num">${neg}</div><div class="metric-label">Em Negociação</div></div>
+    <div class="metric-card purple"><div class="metric-num">${fechados}</div><div class="metric-label">Fechados</div></div>
+  </div>
+  ${msgsPend>0?`<div class="box" style="border-color:var(--wpp)"><div class="box-title">💬 ${msgsPend} mensagem(ns) nova(s)</div>${wppMessages.filter(m=>!m.processado).slice(0,3).map(m=>`<div class="lead-row"><div style="flex:1;min-width:0"><div class="lead-nome">📱 ${m.name}</div><div class="lead-info" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px">${m.text}</div></div><button class="btn-wpp" onclick="setTab('wpp')">Ver</button></div>`).join('')}<button style="background:none;border:none;color:var(--wpp);cursor:pointer;font-size:13px;padding:8px 0;" onclick="setTab('wpp')">Ver todas →</button></div>`:''}
+  <div class="box">
+    <div class="box-title">⚡ Resposta Rápida IA</div>
+    <p class="hint">Cole a mensagem do cliente e gere resposta profissional!</p>
+    <div class="canal-row">
+      <button class="canal-btn" id="dash-wpp" onclick="setDashCanal('WhatsApp')">💬 WhatsApp</button>
+      <button class="canal-btn" id="dash-insta" onclick="setDashCanal('Instagram')">📸 Instagram</button>
+    </div>
+    <textarea id="dash-msg" rows="3" placeholder='Ex: "Qual o valor do apartamento?"'></textarea>
+    <button class="btn-primary" id="dash-btn" onclick="gerarRapido()">✨ Gerar Resposta</button>
+    <div id="dash-result" style="display:none" class="ai-result">
+      <div class="ai-channel-label" id="dash-result-label"></div>
+      <div class="ai-text" id="dash-result-text"></div>
+      <button class="btn-copy" onclick="copyText(dashResult)">📋 Copiar</button>
+    </div>
+  </div>
+  <div class="box">
+    <div class="box-title">📋 Últimos Leads</div>
+    ${leads.slice(0,4).map(l=>`<div class="lead-row" onclick="setTab('leads')"><div style="flex:1;min-width:0"><div class="lead-nome">${CANAL_ICON[l.canal]||'📱'} ${l.nome}</div><div class="lead-info">${l.interesse} · ${l.ultimoContato}</div></div><span class="badge" style="background:${STATUS_COLORS[l.status]||'#888'}">${l.status}</span></div>`).join('')}
+    <button style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:13px;padding:8px 0;" onclick="setTab('leads')">Ver todos →</button>
+  </div>`;
+}
+
+function renderWpp(){
+  return `
+  <div class="title-row">
+    <div class="page-title" style="margin:0">💬 WhatsApp</div>
+    <button class="btn-small" onclick="loadWppMessages().then(()=>render())">🔄 Atualizar</button>
+  </div>
+  <div class="box" style="border-color:${zapiOnline?'var(--green)':'var(--red)'}">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span class="status-dot ${zapiOnline?'online':'offline'}"></span>
+      <span style="font-size:13px;font-weight:600;">${zapiOnline?'WhatsApp Conectado':'WhatsApp Desconectado'}</span>
+      <button class="btn-small" style="margin-left:auto" onclick="checkZapiStatus().then(()=>render())">Verificar</button>
+    </div>
+    ${!zapiOnline?`<p class="hint" style="margin-top:8px;color:var(--yellow)">⚠️ Conecte seu WhatsApp no painel z-api.io</p>`:''}
+  </div>
+  <div class="box">
+    <div class="box-title">📤 Enviar Mensagem</div>
+    <div style="margin-bottom:8px"><label>Número (com DDD)</label><input id="send-phone" placeholder="11999998888" type="tel"/></div>
+    <div style="margin-bottom:8px"><label>Mensagem</label><textarea id="send-msg" rows="3" placeholder="Digite sua mensagem..."></textarea></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn-primary" style="margin-top:0" onclick="enviarMsgManual()">📤 Enviar</button>
+      <button class="btn-secondary" onclick="openAiModal('','WhatsApp',document.getElementById('send-phone').value)">✨ IA</button>
+    </div>
+  </div>
+  <div class="box-title" style="margin-top:4px">📥 Mensagens Recebidas</div>
+  ${wppMessages.length===0?`<div class="empty">Nenhuma mensagem.<br><button class="btn-primary" style="width:auto;padding:10px 20px;margin-top:12px" onclick="loadWppMessages().then(()=>render())">🔄 Carregar</button></div>`:
+  wppMessages.map(m=>`
+  <div class="wpp-msg-card">
+    <div class="wpp-msg-header"><span class="wpp-msg-from">📱 ${m.name}</span><span class="wpp-msg-time">${m.time}</span></div>
+    <div class="wpp-msg-text">${m.text}</div>
+    <div class="wpp-msg-actions">
+      <button class="btn-wpp" onclick='responderComIA(${JSON.stringify(m)})'>✨ Responder IA</button>
+      <button class="btn-small" onclick='criarLeadDaMensagem(${JSON.stringify(m)})'>👤 Criar Lead</button>
+      <button class="btn-small" onclick="window.open('https://wa.me/${m.phone}','_blank')">💬 Abrir</button>
+    </div>
+  </div>`).join('')}`;
+}
+
+async function enviarMsgManual(){
+  const phone=document.getElementById('send-phone')?.value?.trim();
+  const msg=document.getElementById('send-msg')?.value?.trim();
+  if(!phone||!msg){showNotif('⚠️ Preencha número e mensagem','#f59e0b');return;}
+  showNotif('⏳ Enviando...');
+  const res=await sendWppMessage(phone,msg);
+  if(res&&!res.error){showNotif('✅ Mensagem enviada!');document.getElementById('send-msg').value='';}
+  else showNotif('⚠️ Erro ao enviar','#ef4444');
+}
+
+function responderComIA(msg){
+  openAiModal(`Cliente perguntou via WhatsApp: "${msg.text}"\n\nCrie uma resposta profissional de corretor de imóveis.`,'WhatsApp',msg.phone);
+}
+
+function renderLeads(){
+  return `
+  <div class="title-row">
+    <div class="page-title" style="margin:0">👥 Leads / CRM</div>
+    <button class="btn-add" onclick="showLeadForm()">+ Novo</button>
+  </div>
+  <div id="lead-form-area"></div>
+  <div id="leads-list">
+    ${leads.map(l=>renderLeadCard(l)).join('')}
+    ${leads.length===0?'<div class="empty">Nenhum lead. Toque em + Novo.</div>':''}
+  </div>`;
+}
+
+function renderLeadCard(l){
+  return `<div class="lead-card" id="lc-${l.id}" style="border-left-color:${STATUS_COLORS[l.status]||'#888'}">
+    <div class="lead-card-top">
+      <div style="flex:1;min-width:0">
+        <div class="lead-card-nome">${CANAL_ICON[l.canal]||'📱'} ${l.nome}</div>
+        <div class="lead-card-info">📞 ${l.telefone||'--'}<br>🏠 ${l.interesse}<br>💰 ${l.valor} · 📅 ${l.ultimoContato}</div>
+        ${l.notas?`<div class="lead-card-nota">📝 ${l.notas}</div>`:''}
+      </div>
+      <span class="badge" style="background:${STATUS_COLORS[l.status]||'#888'};align-self:flex-start">${l.status}</span>
+    </div>
+    <div class="lead-actions">
+      <select class="select-small" onchange="atualizarStatus(${l.id},this.value)">
+        ${Object.keys(STATUS_COLORS).map(s=>`<option${s===l.status?' selected':''}>${s}</option>`).join('')}
+      </select>
+      <button class="btn-small" onclick="openAiModal('Cliente ${l.nome.replace(/'/g,'')} interesse: ${l.interesse}. Valor: ${l.valor}. Gere mensagem acompanhamento.','${l.canal}','${l.phone||''}')">✨ IA</button>
+      <button class="btn-wpp" onclick="abrirWpp('${l.phone||l.telefone}')">💬 WPP</button>
+    </div>
+  </div>`;
+}
+
+function showLeadForm(){
+  document.getElementById('lead-form-area').innerHTML=`
+  <div class="box" style="margin-bottom:14px">
+    <div class="box-title">Cadastrar Lead</div>
+    <div class="form-grid">
+      <div><label>Nome</label><input id="f-nome" placeholder="Nome"/></div>
+      <div><label>Telefone</label><input id="f-tel" placeholder="(11) 99999-9999" type="tel"/></div>
+      <div><label>Interesse</label><input id="f-int" placeholder="Ex: Apt 3 quartos"/></div>
+      <div><label>Valor esperado</label><input id="f-val" placeholder="R$ 400.000"/></div>
+      <div><label>Canal</label><select id="f-canal"><option>WhatsApp</option><option>Instagram</option></select></div>
+      <div><label>Notas</label><input id="f-nota" placeholder="Observações"/></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn-primary" style="margin-top:0;flex:1" onclick="salvarLead()">Salvar</button>
+      <button class="btn-secondary" onclick="document.getElementById('lead-form-area').innerHTML=''">Cancelar</button>
+    </div>
+  </div>`;
+  document.getElementById('f-nome').focus();
+}
+
+function salvarLead(){
+  const nome=document.getElementById('f-nome')?.value?.trim();
+  if(!nome){showNotif('⚠️ Informe o nome','#f59e0b');return;}
+  const tel=document.getElementById('f-tel')?.value||'';
+  const novo={id:Date.now(),nome,telefone:tel,phone:tel.replace(/\D/g,''),canal:document.getElementById('f-canal')?.value||'WhatsApp',status:'Novo',interesse:document.getElementById('f-int')?.value||'',valor:document.getElementById('f-val')?.value||'',notas:document.getElementById('f-nota')?.value||'',ultimoContato:new Date().toISOString().split('T')[0]};
+  leads=[novo,...leads];save('cp_leads',leads);showNotif('✅ Lead salvo!');render();
+}
+
+function atualizarStatus(id,status){
+  leads=leads.map(l=>l.id===id?{...l,status}:l);save('cp_leads',leads);
+  const card=document.getElementById('lc-'+id);
+  if(card){card.style.borderLeftColor=STATUS_COLORS[status]||'#888';const b=card.querySelector('.badge');if(b){b.style.background=STATUS_COLORS[status]||'#888';b.textContent=status;}}
+  showNotif('✅ Status atualizado!');
+}
+
+function abrirWpp(phone){const n=(phone||'').replace(/\D/g,'');window.open(`https://wa.me/${n.startsWith('55')?n:'55'+n}`,'_blank');}
+
+function renderImoveis(){
+  return `<div class="page-title">🏠 Meus Imóveis</div>
+  ${imoveis.map(im=>`<div class="imovel-card">
+    <div class="imovel-top"><span class="imovel-tipo">${im.tipo}</span><span class="badge" style="background:${im.status==='Disponível'?'#10b981':'#ef4444'}">${im.status}</span></div>
+    <div class="imovel-titulo">${im.titulo}</div>
+    <div class="imovel-preco">${im.preco}</div>
+    <div class="imovel-details">📍 ${im.bairro}, ${im.cidade}<br>📐 ${im.area}${im.quartos>0?` · 🛏 ${im.quartos}`:''}${im.banheiros>0?` · 🚿 ${im.banheiros}`:''}${im.vagas>0?` · 🚗 ${im.vagas}`:''}</div>
+    <div class="imovel-desc">${im.descricao}</div>
+    <div class="imovel-actions">
+      <button class="btn-small" onclick="openAiModal('Crie mensagem WhatsApp: ${im.tipo} ${im.titulo} ${im.preco} ${im.area} ${im.bairro} ${im.cidade} ${im.descricao}','WhatsApp','')">💬 WPP</button>
+      <button class="btn-small" onclick="openAiModal('Crie post Instagram: ${im.tipo} ${im.titulo} ${im.preco} ${im.area} ${im.bairro} ${im.cidade} ${im.descricao}','Instagram','')">📸 Insta</button>
+    </div>
+  </div>`).join('')}`;
+}
+
+function renderIA(){
+  return `<div class="page-title">🤖 Assistente IA</div>
+  <div class="box">
+    <div class="box-title">Canal</div>
+    <div class="canal-row">
+      <button class="canal-btn ${iaCanal==='WhatsApp'?'active-wpp':''}" id="ia-wpp" onclick="setIACanal('WhatsApp')">💬 WhatsApp</button>
+      <button class="canal-btn ${iaCanal==='Instagram'?'active-insta':''}" id="ia-insta" onclick="setIACanal('Instagram')">📸 Instagram</button>
+    </div>
+    <div class="box-title" style="margin-top:10px">Mensagem do cliente</div>
+    <textarea id="ia-prompt" rows="4" placeholder='Ex: "Qual o valor e condições do apartamento?"'></textarea>
+    <button class="btn-primary" id="ia-btn" onclick="gerarIA()">✨ Gerar Resposta Profissional</button>
+    <div id="ia-result-box" style="display:none" class="ai-result">
+      <div class="ai-channel-label" id="ia-result-label"></div>
+      <div class="ai-text" id="ia-result-text"></div>
+      <button class="btn-copy" onclick="copyText(iaResult2)">📋 Copiar</button>
+    </div>
+  </div>
+  <div class="box">
+    <div class="box-title">💡 Perguntas frequentes</div>
+    <div class="sugest-grid">
+      ${['Qual o valor do apartamento de 3 quartos?','Tem imóvel para financiar?','Quero agendar uma visita','Aceita proposta abaixo?','Quais documentos preciso?','Tem terreno disponível?','Como funciona financiamento Caixa?','Posso usar FGTS?'].map(s=>`<button class="sugest-btn" onclick="document.getElementById('ia-prompt').value='${s}'">${s}</button>`).join('')}
+    </div>
+  </div>`;
+}
+
+function setIACanal(c){
+  iaCanal=c;
+  document.getElementById('ia-wpp').className='canal-btn'+(c==='WhatsApp'?' active-wpp':'');
+  document.getElementById('ia-insta').className='canal-btn'+(c==='Instagram'?' active-insta':'');
+}
+
+async function gerarIA(){
+  const prompt=document.getElementById('ia-prompt')?.value?.trim();if(!prompt)return;
+  const btn=document.getElementById('ia-btn');btn.innerHTML='<span class="spinner"></span>Gerando...';btn.disabled=true;
+  document.getElementById('ia-result-box').style.display='none';
+  try{const r=await callAI(prompt,iaCanal);iaResult2=r;
+    const lbl=document.getElementById('ia-result-label');
+    lbl.style.color=iaCanal==='WhatsApp'?'#25D366':'#E1306C';
+    lbl.textContent=CANAL_ICON[iaCanal]+' Resposta para '+iaCanal;
+    document.getElementById('ia-result-text').textContent=r;
+    document.getElementById('ia-result-box').style.display='block';
+  }catch(e){}
+  btn.innerHTML='✨ Gerar Resposta Profissional';btn.disabled=false;
+}
+
+function setDashCanal(c){
+  dashCanal=c;
+  document.getElementById('dash-wpp').className='canal-btn'+(c==='WhatsApp'?' active-wpp':'');
+  document.getElementById('dash-insta').className='canal-btn'+(c==='Instagram'?' active-insta':'');
+}
+
+async function gerarRapido(){
+  const msg=document.getElementById('dash-msg')?.value?.trim();if(!msg)return;
+  const btn=document.getElementById('dash-btn');btn.innerHTML='<span class="spinner"></span>Gerando...';btn.disabled=true;
+  document.getElementById('dash-result').style.display='none';
+  try{const r=await callAI(`Cliente via ${dashCanal}: "${msg}"\n\nGere resposta profissional de corretor.`,dashCanal);
+    dashResult=r;
+    document.getElementById('dash-result-label').style.color=dashCanal==='WhatsApp'?'#25D366':'#E1306C';
+    document.getElementById('dash-result-label').textContent=CANAL_ICON[dashCanal]+' Resposta para '+dashCanal;
+    document.getElementById('dash-result-text').textContent=r;
+    document.getElementById('dash-result').style.display='block';
+  }catch(e){}
+  btn.innerHTML='✨ Gerar Resposta';btn.disabled=false;
+}
+
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;render();});
+function installPWA(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{deferredPrompt=null;render();});}}
+
+if('serviceWorker' in navigator){
+  const sw=`const C='cp-v1';self.addEventListener('install',()=>self.skipWaiting());self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==C).map(x=>caches.delete(x)))));self.clients.claim();});self.addEventListener('fetch',e=>{if(e.request.url.includes('api.anthropic')||e.request.url.includes('api.z-api')||e.request.url.includes('fonts.googleapis'))return;e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>caches.match('/'))));});`;
+  navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(()=>{});
+}
+
+checkZapiStatus();
+render();
+setModalCanal('WhatsApp');
+setInterval(()=>{if(currentTab==='wpp')loadWppMessages().then(()=>render());else checkZapiStatus();},30000);
+</script>
+</body>
+</html>
